@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="6b4c271b-fc08-40cc-aaa0-8fe0608e8350" name="berry.local" url="http://berry.local">
+        <fileTransfer host="berry.local" port="22" accessType="SFTP" password="dfd8dfcbdfd9dfdadfc8dfcfdfd8dfd8dfd3" username="pi">
+          <advancedOptions>
+            <advancedOptions controlEncoding="utf-8" dataProtectionLevel="Private" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
