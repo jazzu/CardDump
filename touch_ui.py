@@ -1,7 +1,6 @@
 __author__ = 'jazzu'
 
 import pygame
-from pygame.locals import *
 
 # set up the colors
 BLACK = (0, 0, 0)
