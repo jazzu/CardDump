@@ -1,6 +1,7 @@
 __author__ = 'jazzu'
 
 import os
+from shutil import copy
 
 source_dir = '/home/pi/test/source'
 destination_dir = '/home/pi/test/destination'
