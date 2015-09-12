@@ -16,6 +16,7 @@ YELLOW = (255, 255, 0)
 screen = None
 quit_box_rect = None
 progress_bar_rect = None
+start_copy_rect = None
 
 
 def set_screen(scr=None):
@@ -25,10 +26,11 @@ def set_screen(scr=None):
     :param scr:
     :return:
     """
-    global screen, quit_box_rect, progress_bar_rect
+    global screen, quit_box_rect, progress_bar_rect, start_copy_rect
     screen = scr
     quit_box_rect = pygame.Rect(290, 0, 30, 30)
     progress_bar_rect = pygame.Rect(10, (screen.get_height() / 2 - 20), (screen.get_width() - 20), 40)
+    start_copy_rect = pygame.Rect(130, 155, 60, 30)
 
 
 def quit_button(inverse=False):
@@ -38,13 +40,13 @@ def quit_button(inverse=False):
     font = pygame.font.Font(None, 36)
 
     if inverse:
-        txt_fg = WHITE
+        text_fg = WHITE
     else:
-        txt_fg = BLACK
+        text_fg = BLACK
 
-    quit_x = font.render("X", 1, txt_fg)
-    textpos = quit_x.get_rect(centerx=quit_box_rect.centerx, centery=quit_box_rect.centery)
-    screen.blit(quit_x, textpos)
+    text = font.render("X", 1, text_fg)
+    textpos = text.get_rect(centerx=quit_box_rect.centerx, centery=quit_box_rect.centery)
+    screen.blit(text, textpos)
 
 
 def progress_bar():
@@ -54,3 +56,14 @@ def progress_bar():
                                                                   progress_bar_rect.y + 3,
                                                                   progress_bar_rect.width - 6,
                                                                   progress_bar_rect.height - 6))
+
+
+def mock_start_copy(inverse=False):
+    global start_copy_rect
+    start_copy = pygame.draw.rect(screen, GREEN, start_copy_rect)
+    start_copy = pygame.draw.rect(screen, YELLOW, start_copy_rect, inverse)
+    font = pygame.font.Font(None, 20)
+    text_fg = BLACK
+    text = font.render("Start", 1, text_fg)
+    textpos = text.get_rect(centerx=start_copy_rect.centerx, centery=start_copy_rect.centery)
+    screen.blit(text, textpos)

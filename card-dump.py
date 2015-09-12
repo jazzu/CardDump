@@ -1,19 +1,18 @@
-__author__ = 'jazzu'
-
 import os
 import sys
 import pyudev
 import pygame
 from pygame.locals import *
+from multiprocessing import Pipe
+import threading
 
 import touch_ui
+import device_manager
 
+__author__ = 'jazzu'
 
-def some_callback_function(action, device):
-    """ Callback for later to handle mass storage attach and detach.
-        device.action == add && device.action == remove """
-    print("Action!")
-
+# Setup pipes for GUI update messages
+gui_conn, fileops_conn = Pipe()
 
 # Setup udev event monitoring
 udev_context = pyudev.Context()
@@ -21,7 +20,7 @@ udev_monitor = pyudev.Monitor.from_netlink(udev_context)
 
 # Monitor all storage device related signals
 udev_monitor.filter_by('block', 'partition')
-observer = pyudev.MonitorObserver(udev_monitor, some_callback_function)
+observer = pyudev.MonitorObserver(udev_monitor, device_manager.udev_event_callback)
 observer.start()
 
 
@@ -39,6 +38,7 @@ pygame.display.set_caption('Card Dump')
 
 touch_ui.quit_button(inverse=False)
 touch_ui.progress_bar()
+touch_ui.mock_start_copy()
 
 pygame.display.flip()
 
@@ -60,7 +60,6 @@ while running:
                 # UI response
                 touch_ui.quit_button(inverse=True)
                 pygame.display.flip()
-
                 print("Quitting...")
 
                 # NB: udev async monitor observer thread must be explicitly stopped.
@@ -68,7 +67,15 @@ while running:
                 pygame.quit()
                 sys.exit()
                 running = False
+            elif touch_ui.start_copy_rect.collidepoint(pygame.mouse.get_pos()):
+                touch_ui.mock_start_copy(inverse=True)
+                pygame.display.flip()
+                print("Start copying...")
+
+                # Manual call for testing purposes
+                device_manager.udev_event_callback("add", "foo")
+
         elif event.type == KEYDOWN and event.key == K_ESCAPE:
             running = False
-    pygame.display.update()
 
+    pygame.display.update()
