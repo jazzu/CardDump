@@ -1,6 +1,5 @@
-__author__ = 'jazzu'
-
 import pygame
+import math
 
 # set up the colors
 BLACK = (0, 0, 0)
@@ -51,11 +50,7 @@ def quit_button(inverse=False):
 
 def progress_bar():
     global progress_bar_rect
-    progress_bar_frame = pygame.draw.rect(screen, GREEN, progress_bar_rect, True)
-    progress_bar_faux = pygame.draw.rect(screen, GREEN, (progress_bar_rect.x + 3,
-                                                                  progress_bar_rect.y + 3,
-                                                                  progress_bar_rect.width - 6,
-                                                                  progress_bar_rect.height - 6))
+    # progress_bar_frame = pygame.draw.rect(screen, GREEN, progress_bar_rect, True)
 
 
 def mock_start_copy(inverse=False):
@@ -67,3 +62,22 @@ def mock_start_copy(inverse=False):
     text = font.render("Start", 1, text_fg)
     textpos = text.get_rect(centerx=start_copy_rect.centerx, centery=start_copy_rect.centery)
     screen.blit(text, textpos)
+
+
+def update(data):
+    global progress_bar_rect
+    if data['stat'] == 'total':
+        pb_total = pygame.draw.rect(screen, GREEN, (progress_bar_rect.x,
+                                                    progress_bar_rect.y,
+                                                    int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
+                                                    progress_bar_rect.height / 2))
+        # "Reset" file progress bar
+        pb_file = pygame.draw.rect(screen, BLACK, (progress_bar_rect.x,
+                                                  progress_bar_rect.y + (progress_bar_rect.height / 2),
+                                                  progress_bar_rect.width,
+                                                  progress_bar_rect.height / 2))
+    elif data['stat'] == 'file':
+        pb_file = pygame.draw.rect(screen, BLUE, (progress_bar_rect.x,
+                                                  progress_bar_rect.y + (progress_bar_rect.height / 2),
+                                                  int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
+                                                  progress_bar_rect.height / 2))
