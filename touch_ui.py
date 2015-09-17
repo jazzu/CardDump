@@ -55,29 +55,42 @@ def progress_bar():
 
 def mock_start_copy(inverse=False):
     global start_copy_rect
-    start_copy = pygame.draw.rect(screen, GREEN, start_copy_rect)
-    start_copy = pygame.draw.rect(screen, YELLOW, start_copy_rect, inverse)
+    start_copy = pygame.draw.rect(screen, BLACK, start_copy_rect)  # Reset
+    start_copy = pygame.draw.rect(screen, WHITE, start_copy_rect, inverse)
     font = pygame.font.Font(None, 20)
-    text_fg = BLACK
-    text = font.render("Start", 1, text_fg)
+
+    msg = 'Start'
+    if inverse:
+        text_fg = WHITE
+        msg = 'Copying...'
+    else:
+        text_fg = BLACK
+
+    text = font.render(msg, 1, text_fg)
     textpos = text.get_rect(centerx=start_copy_rect.centerx, centery=start_copy_rect.centery)
     screen.blit(text, textpos)
 
 
 def update(data):
     global progress_bar_rect
-    if data['stat'] == 'total':
-        pb_total = pygame.draw.rect(screen, GREEN, (progress_bar_rect.x,
-                                                    progress_bar_rect.y,
-                                                    int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
-                                                    progress_bar_rect.height / 2))
-        # "Reset" file progress bar
-        pb_file = pygame.draw.rect(screen, BLACK, (progress_bar_rect.x,
-                                                  progress_bar_rect.y + (progress_bar_rect.height / 2),
-                                                  progress_bar_rect.width,
-                                                  progress_bar_rect.height / 2))
-    elif data['stat'] == 'file':
-        pb_file = pygame.draw.rect(screen, BLUE, (progress_bar_rect.x,
-                                                  progress_bar_rect.y + (progress_bar_rect.height / 2),
-                                                  int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
-                                                  progress_bar_rect.height / 2))
+
+    if 'finished' in data:
+        # Clear all everything
+        pygame.draw.rect(screen, BLACK, progress_bar_rect)
+        mock_start_copy()
+    else:
+        if data['stat'] == 'total':
+            pb_total = pygame.draw.rect(screen, GREEN, (progress_bar_rect.x,
+                                                        progress_bar_rect.y,
+                                                        int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
+                                                        progress_bar_rect.height / 2))
+            # "Reset" file progress bar
+            pb_file = pygame.draw.rect(screen, BLACK, (progress_bar_rect.x,
+                                                      progress_bar_rect.y + (progress_bar_rect.height / 2),
+                                                      progress_bar_rect.width,
+                                                      progress_bar_rect.height / 2))
+        elif data['stat'] == 'file':
+            pb_file = pygame.draw.rect(screen, BLUE, (progress_bar_rect.x,
+                                                      progress_bar_rect.y + (progress_bar_rect.height / 2),
+                                                      int(math.ceil(float(data['completed']) / data['total'] * progress_bar_rect.width)),
+                                                      progress_bar_rect.height / 2))

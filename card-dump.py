@@ -41,7 +41,7 @@ def main(args):
 
     touch_ui.set_screen(screen)
 
-    touch_ui.quit_button(inverse=False)
+    touch_ui.quit_button()
     touch_ui.progress_bar()
     touch_ui.mock_start_copy()
 
