@@ -1,0 +1,2 @@
+* Setting up unformatted media
+* Manage other than DCF media sources

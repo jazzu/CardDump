@@ -1,5 +1,7 @@
-import pygame
 import math
+
+import pygame
+
 
 # set up the colors
 BLACK = (0, 0, 0)
@@ -48,11 +50,6 @@ def quit_button(inverse=False):
     screen.blit(text, textpos)
 
 
-def progress_bar():
-    global progress_bar_rect
-    # progress_bar_frame = pygame.draw.rect(screen, GREEN, progress_bar_rect, True)
-
-
 def mock_start_copy(inverse=False):
     global start_copy_rect
     start_copy = pygame.draw.rect(screen, BLACK, start_copy_rect)  # Reset
@@ -71,7 +68,7 @@ def mock_start_copy(inverse=False):
     screen.blit(text, textpos)
 
 
-def update(data):
+def update_progress_bar(data):
     global progress_bar_rect
 
     if 'finished' in data:

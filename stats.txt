@@ -1,0 +1,21 @@
+500 files, á 3 MB/3145728 B
+
+pi@berry ~/pywork/card-dump $ du ~/test
+1536020 /home/pi/test/source/DCIM/100FUBAR
+1536024 /home/pi/test/source/DCIM
+1536044 /home/pi/test/source
+1536024 /home/pi/test/destination
+3072072 /home/pi/test
+
+### Copy using shutil.copy
+
+real    4m14.488s
+user    0m3.020s
+sys     0m19.290s
+
+### Copy by byte/block
+
+real    4m18.082s
+user    0m3.510s
+sys     0m19.280s
+
