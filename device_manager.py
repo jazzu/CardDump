@@ -101,46 +101,63 @@ class DeviceManager(threading.Thread):
 
         return src_size
 
+    def _check_device_type(self):
+        DeviceManager.mount(self._device.device_node, self._temp_dir)
+        type = DeviceManager.check_dir_type()
+        DeviceManager.unmount(self._temp_dir)
+        return type
+
     def _add_and_copy(self):
         # TODO: Implement proper logging
         print('Add and copy')
         print(self._device.device_node)
         # TODO: Bring source_dir and destination_dir in from the command line or environment, if defined
 
-        # Mount source (where's destination mounted?)
-        DeviceManager.mount(self._device.device_node, self._source_dir)
-        self._create_dump_destination_dir()
-        self._create_next_copy_dir()
+        # Check whether attached device is a source or a destination
+        device_type = self._check_device_type()
+        if device_type == 'source':
+            DeviceManager.mount(self._device.device_node, self._source_dir)
+        elif device_type == 'destination':
+            DeviceManager.mount(self._device.device_node, self._destination_dir)
 
-        # Discover & copy
-        copy_list = []
+        # If class has source + destination after this, do copy.
+        # Otherwise save the situation and return, and continue when missing media is attached.
 
-        # Discover and count files and sum their sizes
-        for root, dirs, files in os.walk(self._source_dir):
-            copy_list.append((root, files))
-            self.files_total += len(files)
-            for f in files:
-                self.bytes_total += os.stat(root + '/' + f).st_size
+        if DeviceManager.is_mounted(self._source_dir) and DeviceManager.is_mounted(self._destination_dir):
 
-        # Guard against div/0
-        self.bytes_total += 1
+            self._create_dump_destination_dir()
+            self._create_next_copy_dir()
 
-        # Copy files from non-empty directories, report total progress between each file
-        for entry in copy_list:
-            if entry[self.FILES]:
-                for f in entry[self.FILES]:
-                    # Check for stop request per file
-                    if self._stop_request.is_set():
-                        break
-                    source = entry[self.DIR] + '/' + f
-                    destination = self._destination_dir + '/' + self._card_dump_dir + '/' + f
-                    self.bytes_completed += self._copy_file(source, destination)
-                    self._return_q.put_nowait({'stat': 'total',
-                                              'total': self.bytes_total,
-                                              'completed': self.bytes_completed})
+            # Discover & copy
+            copy_list = []
 
-        DeviceManager.unmount(self._source_dir)
-        self._return_q.put_nowait({'finished': True})
+            # Discover and count files and sum their sizes
+            for root, dirs, files in os.walk(self._source_dir):
+                copy_list.append((root, files))
+                self.files_total += len(files)
+                for f in files:
+                    self.bytes_total += os.stat(root + '/' + f).st_size
+
+            # Guard against div/0
+            self.bytes_total += 1
+
+            # Copy files from non-empty directories, report total progress between each file
+            for entry in copy_list:
+                if entry[self.FILES]:
+                    for f in entry[self.FILES]:
+                        # Check for stop request per file
+                        if self._stop_request.is_set():
+                            break
+                        source = entry[self.DIR] + '/' + f
+                        destination = self._destination_dir + '/' + self._card_dump_dir + '/' + f
+                        self.bytes_completed += self._copy_file(source, destination)
+                        self._return_q.put_nowait({'stat': 'total',
+                                                  'total': self.bytes_total,
+                                                  'completed': self.bytes_completed})
+
+            # Unmount only source, leave destination connected for multiple dumps
+            DeviceManager.unmount(self._source_dir)
+            self._return_q.put_nowait({'finished': True})
 
     def _remove_and_notify(self, device):
         print('Remove and notify')
@@ -193,6 +210,14 @@ class DeviceManager(threading.Thread):
             print('Unmounting ' + target + ' failed.')
 
     @staticmethod
+    def is_mounted(path):
+        output = sh.mount
+        if re.search(path, 'output'):
+            return True
+
+        return False
+
+    @staticmethod
     def scan_usb_devices():
         discovered_devices = []
         # /dev/disk/by-path/  --> regex /usb/
@@ -207,21 +232,32 @@ class DeviceManager(threading.Thread):
         return discovered_devices
 
     @staticmethod
+    def check_dir_type():
+        file_list = os.listdir(DeviceManager._temp_dir)
+
+        if DeviceManager._source_indicator in file_list:
+            return 'source'
+        elif DeviceManager._destination_indicator in file_list:
+            return 'destination'
+        else:
+            return 'other'
+
+    @staticmethod
     def list_media():
-        candidate_devies = DeviceManager.scan_usb_devices()
+        candidate_devices = DeviceManager.scan_usb_devices()
         sources = []
         destinations = []
         empties = []
 
-        for device in candidate_devies:
+        for device in candidate_devices:
             DeviceManager.mount(device, DeviceManager._temp_dir)
-            file_list = os.listdir(DeviceManager._temp_dir)
+            dir_type = DeviceManager.check_dir_type()
 
             # Priority for media binding: source > destination > empty
             # Never ever use a media as a dump destination, if it has source indications in it
-            if DeviceManager._source_indicator in file_list:
+            if dir_type == 'source':
                 sources.append(device)
-            elif DeviceManager._destination_indicator in file_list:
+            elif dir_type == 'destination':
                 destinations.append(device)
             else:
                 empties.append(device)

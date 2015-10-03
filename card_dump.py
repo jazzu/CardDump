@@ -82,6 +82,7 @@ def main(args):
         source_set = True
     elif len(source_candidates) > 1:
         # Too many source candidates - ask user which one to copy
+        # TODO: Implement "Too many source candidates"
         list(source_candidates)
     else:
         # No source candidates, one might be attached later
@@ -92,6 +93,7 @@ def main(args):
         destination_set = True
     elif len(destination_candidates) > 1:
         # Too many destination candidates - ask user which one to copy
+        # TODO: Implement "Too many destination candidates"
         list(destination_candidates)
     else:
         # No destination candidates, one might be attached later
